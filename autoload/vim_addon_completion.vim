@@ -96,5 +96,5 @@ fun! vim_addon_completion#SetFuncFirstTime(type)
   if fun == ''
     call vim_addon_completion#ChooseFunc({'user' : 1, 'type': a:type})
   endif
-  return ''
+  return "\<c-x>".(a:type == 'omni' ? "\<c-o>" : "\<c-u>")
 endf

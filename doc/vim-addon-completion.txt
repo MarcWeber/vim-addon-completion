@@ -1,0 +1,35 @@
+Purpose
+=======
+Let the user select a completion function.
+
+usage
+=====
+- register a func:
+
+  call vim_addon_completion#RegisterCompletionFunc({'func':'MyComplete'})
+
+  optional keys you can pass along with 'func':
+    scope: filetype name (optional)
+    description: long description (optional)
+    completeopt: completion options to be used for this completion function (optional)
+
+
+- choose a completion function:
+  commands:
+
+  CFComplete optional-regex
+  OFComplete optional-regex
+
+  where
+    C = completefunc
+    O = ompnifunc
+
+
+INFO: this plugin remaps <c-x><c-o> and <c-x><c-u>. If no function was defined
+yet you'll be asked to choose your completion func.
+
+use
+
+  call vim_addon_completion#SetCompletionFunc(func)
+
+within a filetype file to prevent this

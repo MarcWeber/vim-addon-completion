@@ -31,7 +31,7 @@ fun! vim_addon_completion#ChooseFunc(opts)
   call filter(items, '!has_key(v:val,"scope") || v:val["scope"] =~ '.string(substitute(&filetype,'\.','\|','g')))
   " filter by given regex or name:
   if has_key(a:opts,'regex')
-    let regex = a:1
+    let regex = a:opts['regex']
     call filter(items, 'v:val["func"] =~ '.string(a:opts['regex']))
   endif
 
@@ -52,14 +52,14 @@ fun! vim_addon_completion#ChooseFunc(opts)
     if &filetype != '' && has_key(a:opts,'user')
       let s:last_chosen[&filetype] = item['func']
     endif
-    call vim_addon_completion#SetCompletionFunc(a:opts['type'], i['func'])
+    call vim_addon_completion#SetCompletionFunc(a:opts['type'], item['func'])
 
     " set other completion function to the next available if it wasn't set by
     " user explicitely
     let other = a:opts['type'] == 'complete' ? 'omni' : 'complete'
-    if = vim_addon_completion#Get(other)
+    let of = vim_addon_completion#Get(other)
     if of == ''
-      let next = vim_addon_completion#NextFunc(i['func'])
+      let next = vim_addon_completion#NextFunc(item['func'])
       call vim_addon_completion#SetCompletionFunc(other, next)
       if &filetype != '' && has_key(a:opts,'user')
         let s:last_chosen[&filetype] = item['func']

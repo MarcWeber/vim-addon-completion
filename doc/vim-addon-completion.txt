@@ -25,6 +25,10 @@ usage
     O = ompnifunc
 
 
+  Note: If you choose either omni or complete func and the other hasn't been
+  defined yet it will be set to the next available function automatically.
+  I nmost cases you don't have that many functions.
+
 INFO:
 
   This plugin remaps <c-x><c-o> and <c-x><c-u>. If no function was defined

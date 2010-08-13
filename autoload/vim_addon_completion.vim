@@ -131,3 +131,50 @@ fun! vim_addon_completion#Cycle(type)
   echoe 'set '.a:type.' to '.next
   return ''
 endf
+
+" provide a function which translates a pattern into a regex and or glob
+" pattern. You can implement camel case matching this way.
+"
+" may return {}
+" if vim_regex is returned this pattern should be matched against names as
+" well to determine wether an item must be added to the completion list
+" users can implement camel case matching or similar
+" identifier: a name of the completion invoking this function.
+"             You may want to customize only some completions, not all
+"
+fun! vim_addon_completion#AdditionalCompletionMatchPatterns(pat, identifier, ...)
+  let opts = a:0 > 0 ? a:1 : {}
+  let start = get(opts,'match_beginning_of_string', 1)
+
+  if exists('g:vim_addon_completion_Pattern_To')
+    return call(g:vim_addon_completion_Pattern_To, [a:pat, a:identifier, opts])
+  else
+    " default: provide camel case matching
+    " don't know how to make CamelCase matching using glob
+    " glob may be used by some plugins
+    return {
+          \ 'vim_regex': (start ? '^' : '').vim_addon_completion#AdvancedCamelCaseMatching(a:pat)
+          \ }
+  endif
+endf
+
+" abc also matches axxx_bxxx_cxxx
+" ABC also matches AxxxBxxxxCxxx
+" ABC also matches ABxxCxx
+function! vim_addon_completion#AdvancedCamelCaseMatching(expr)
+  let result = ''
+  if len(a:expr) > 5 " vim can't cope with to many \( ? and propably we no longer want this anyway
+    return 'noMatchDoh'
+  endif
+  for index in range(0,len(a:expr))
+    let c = a:expr[index]
+    if c =~ '\u'
+      let result .= c.'\u*\l*_\='
+    elseif c =~ '\l'
+      let result .= c.'\l*\%(\l\)\@!_\='
+    else
+      let result .= c
+    endif
+  endfor
+  return result
+endfunction

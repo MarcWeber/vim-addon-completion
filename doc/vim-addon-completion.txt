@@ -44,3 +44,31 @@ INFO:
   This script tries hard to not interfer with existing scripts. If a completion
   function is found which is not in the function list it will be added
   automatically.
+
+
+How to provide customizable matches to users
+============================================
+
+AdditionalCompletionMatchPatterns returns a regex matching CamelCase patterns.
+See comment above the function.
+A user can override the default behaviour.
+
+Example usage:
+
+fun Compl(first, base)
+  if ..
+  else
+    let patterns = vim_addon_completion#AdditionalCompletionMatchPatterns(a:base
+        \ , "your_completion_func_name", {'match_beginning_of_string': 1})
+    let additional_regex = get(patterns, 'vim_regex', "")
+    
+    list names = ["name","another_name"]
+
+    for n in names
+      if n =~ '^'.a:base || (additional_regex != "" && a:base =~ additional_regex)
+        call complete_add({'word': n, ....})
+      endif
+    endfor
+    return []
+  endif
+endfun

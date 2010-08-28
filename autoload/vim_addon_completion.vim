@@ -82,9 +82,9 @@ fun! vim_addon_completion#SetCompletionFunc(type, func)
   endif
 
   " set oompletion function
-  exec 'set '.a:type.'func='.i['func']
+  exec 'setlocal '.a:type.'func='.i['func']
   if has_key(i,'completeopt')
-    exec 'set completeopt='.i['completeopt']
+    exec 'setlocal completeopt='.i['completeopt']
   endif
 endf
 

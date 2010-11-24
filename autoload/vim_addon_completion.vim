@@ -178,3 +178,43 @@ function! vim_addon_completion#AdvancedCamelCaseMatching(expr)
   endfor
   return result
 endfunction
+
+" same as ctrl-n but smarter because its using AdvancedCamelCaseMatching
+" or more dump because its only taking the current buffer into acocunt
+" only complete vars which are longer than 3 chars.
+fun! vim_addon_completion#CompleteWordsInBuffer(findstart, base)
+  if a:findstart
+    let [bc,ac] = vim_addon_completion#BcAc()
+    let s:match_text = matchstr(bc, '\zs[^\t#().[\]/{}\''";: ]*$')
+    let s:start = len(bc)-len(s:match_text)
+    return s:start
+  else
+    
+    let words = {}
+    for w in split(join(getline(1, line('$'))," "),'[/#''"; \()[\t\]{}.,+*:]\+')
+      let words[w] = 1
+    endfor
+
+    let patterns = vim_addon_completion#AdditionalCompletionMatchPatterns(a:base
+        \ , "ocaml_completion", { 'match_beginning_of_string': 1})
+    let additional_regex = get(patterns, 'vim_regex', "")
+
+    let r = []
+    for t in keys(words)
+      if len(t) >= 4
+        if t =~ '^'.a:base || (additional_regex != '' && t =~ additional_regex)
+          call add(r, {'word': t})
+        endif
+      endif
+    endfor
+    return r
+  endif
+endf
+
+" before cursor after cursor
+function! vim_addon_completion#BcAc()
+  let pos = col('.') -1
+  let line = getline('.')
+  return [strpart(line,0,pos), strpart(line, pos, len(line)-pos)]
+endfunction
+

@@ -1,6 +1,7 @@
 Purpose
 =======
 Let the user select a completion function.
+Example: Word completion with CamelCase matching (-> inoremap below)
 
 usage
 =====
@@ -44,6 +45,10 @@ INFO:
   This script tries hard to not interfer with existing scripts. If a completion
   function is found which is not in the function list it will be added
   automatically.
+
+
+If OFComplete or CFComplete is still too cumbersome I recommend such a mapping:
+  inoremap <buffer> <C-x><C-w> <c-o>:setlocal omnifunc=vim_addon_completion#CompleteWordsInBuffer<cr><c-x><c-o>
 
 
 How to provide customizable matches to users

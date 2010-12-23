@@ -7,10 +7,11 @@ let s:config['last_chosen'] = get(s:config, 'last_chosen', {})
 let s:config['functions'] = get(s:config, 'functions', {})
 let s:last_chosen = s:config['last_chosen']
 
-" return next available function in order
+" return next available function in order matching scope (filetype)
 " if f cannot be found return first func
 fun! vim_addon_completion#NextFunc(f)
-  let c = keys(s:config['functions'])
+  let list = filter(copy(s:config['functions']), '!has_key(v:val,"scope") || v:val["scope"] =~ '.string(substitute(&filetype,'\.','\|','g')))
+  let c = keys(list)
   let idx = (index(c, a:f) + 1) % len(c)
   return c[idx]
 endf
@@ -24,6 +25,8 @@ endf
 "             'type': "omni" or "complete"
 "   optional: 'regex':   Only show items matching regex
 "   optional: 'user' : any_val Function was called by user (update dict last_chosen)
+"   optional: 'first': don't ask user, choose first
+"   optional: 'silent': Don't show echoe message if no completions match
 fun! vim_addon_completion#ChooseFunc(opts)
 
   let items = values(s:config['functions'])
@@ -37,15 +40,21 @@ fun! vim_addon_completion#ChooseFunc(opts)
 
   " let user choose an item if there are more than 1 left:
   if len(items) > 1
-    let list = []
-    for i in items
-      call add(list, i['func'].' '.get(i,'scope','').' '.get(i,'description',''))
-    endfor
-    let idx = tlib#input#List("si",'choose '.a:opts['type'].'func: ', list) - 1
-    let items = [items[idx]]
+    if get(a:opts, 'first', 0)
+      let items = items[:0]
+    else
+      let list = []
+      for i in items
+        call add(list, i['func'].' '.get(i,'scope','').' '.get(i,'description',''))
+      endfor
+      let idx = tlib#input#List("si",'choose '.a:opts['type'].'func: ', list) - 1
+      let items = [items[idx]]
+    endif
   endif
   if len(items) == 0
-    echoe "no completion functions available!"
+    if !get(a:opts, 'silent', 0)
+      echoe "no completion functions available!"
+    endif
     return
   else
     let item = items[0]
@@ -89,10 +98,12 @@ fun! vim_addon_completion#SetCompletionFunc(type, func)
 endf
 
 fun! vim_addon_completion#ChooseFuncWrapper(type, ...)
-  let dict = {'user' : 1, 'type': a:type}
-  if a:0 > 0
-    let dict['regex'] = a:1
+  let dict = a:0 > 0 ? a:1 : {}
+  if type(dict) != type({})
+    throw "passing regex is supported this way now: {'regex': value}"
   endif
+  let dict['user'] = 1
+  let dict['type'] = a:type
   call vim_addon_completion#ChooseFunc(dict)
 endf
 

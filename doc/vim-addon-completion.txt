@@ -3,11 +3,14 @@ Purpose
 Let the user select a completion function.
 Example: Word completion with CamelCase matching (-> inoremap below)
 
-If you use a completion function very often I recommend creating your own mapping like this:
+If you use a completion function I recommend creating your own mapping like this:
   inoremap <buffer> <C-x><C-w> <c-r>=vim_addon_completion#CompleteUsing('vim_addon_completion#CompleteWordsInBuffer')<cr>
+This version also stores current omnifunc in the list so that you can get it back easily
 
-  " This is an alternative. But sometimes vim pastes the characters into the buffer:
+
+  " This is an alternative. But sometimes vim pastes (arbitrary?) characters into the buffer:
   " inoremap <buffer> <C-x><c-w> <c-o>:setlocal omnifunc=vim_addon_completion#CompleteWordsInBuffer<cr><c-x><c-o>
+
 
 usage
 =====

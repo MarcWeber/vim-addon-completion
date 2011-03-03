@@ -77,10 +77,7 @@ fun! vim_addon_completion#ChooseFunc(opts)
   endif
 endf
 
-fun! vim_addon_completion#SetCompletionFunc(type, func)
-  let i = s:config['functions'][a:func]
-  " be smart: If the current completion function isn't known save that
-  " the user can switch back
+fun! vim_addon_completion#StoreCompletionFunc(type)
   let fu = vim_addon_completion#Get(a:type)
   if fu != '' && !has_key(s:config['functions'], fu)
     let d = {'func' : fu}
@@ -89,6 +86,13 @@ fun! vim_addon_completion#SetCompletionFunc(type, func)
     end
     call vim_addon_completion#RegisterCompletionFunc(d)
   endif
+endf
+
+fun! vim_addon_completion#SetCompletionFunc(type, func)
+  let i = s:config['functions'][a:func]
+  " be smart: If the current completion function isn't known save that
+  " the user can switch back
+  call vim_addon_completion#StoreCompletionFunc(a:type)
 
   " set oompletion function
   exec 'setlocal '.a:type.'func='.i['func']
@@ -230,7 +234,7 @@ function! vim_addon_completion#BcAc()
 endfunction
 
 fun! vim_addon_completion#CompleteUsing(func_name)
+  call vim_addon_completion#StoreCompletionFunc('omni')
   exec 'setlocal omnifunc='.a:func_name
-  call feedkeys("\<c-x>\<c-o>",'n')
-  return ""
+  return "\<c-x>\<c-o>"
 endf

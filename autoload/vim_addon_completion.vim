@@ -112,7 +112,7 @@ fun! vim_addon_completion#ChooseFuncWrapper(type, ...)
 endf
 
 fun! vim_addon_completion#Var()
-  call scriptmanager#DefineAndBind('res', a:scope.':completion_functions', '{}')
+  call vam#DefineAndBind('res', a:scope.':completion_functions', '{}')
   return res
 endf
 

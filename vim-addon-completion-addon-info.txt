@@ -5,7 +5,7 @@
   "maintainer" : "Marc Weber <marco-oweber@gmx.de>",
   "repository" : {"type": "git", "url": "git://github.com/MarcWeber/vim-addon-completion.git"},
   "dependencies" : {
-    "tlib": {},
+    "tlib": {}
   },
   "description" : "interface to allow user switching between multiple completion functions"
 }

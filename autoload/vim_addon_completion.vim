@@ -200,13 +200,13 @@ endfunction
 fun! vim_addon_completion#CompleteWordsInBuffer(findstart, base)
   if a:findstart
     let [bc,ac] = vim_addon_completion#BcAc()
-    let s:match_text = matchstr(bc, '\zs[^\t#().&[\]/{}\''`";: ]*$')
+    let s:match_text = matchstr(bc, '\zs[^\t#$,().&[\]/{}\''`";: ]*$')
     let s:start = len(bc)-len(s:match_text)
     return s:start
   else
     
     let words = {}
-    for w in split(join(getline(1, line('$'))," "),'[/#''"`; \&()[\t\]{}.,+*:]\+')
+    for w in split(join(getline(1, line('$'))," "),'[/#$,''"`; \&()[\t\]{}.,+*:]\+')
       let words[w] = 1
     endfor
 

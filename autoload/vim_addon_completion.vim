@@ -85,12 +85,14 @@ function! vim_addon_completion#BcAc()
 endfunction
 
 " complete with custom function preserving omnifunc setting
-" Usage: inoremap <buffer> <expr> \start_completion vim_addon_completien#CompleteWith("vim_addon_completion#CompleteWordsInBuffer")'
-fun! vim_addon_completion#CompleteUsing(func_name)
+" Usage: inoremap <buffer> <expr><silent> \start_completion vim_addon_completien#CompleteWith("vim_addon_completion#CompleteWordsInBuffer")'
+fun! vim_addon_completion#CompleteUsing(func_name, ...)
+  let co = a:0 > 0 ? a:1 : &l:completeopt
   " after this characters have been process reset completion function.
   " feedkeys must be used, returning same chars with return will hide the
   " completion menue.
-  call feedkeys("\<C-r>=['', setbufvar('%', '&omnifunc', ".string(&l:omnifunc).")][0]\<cr>",'t')
+  call feedkeys("\<C-r>=['', setbufvar('%', '&omnifunc', ".string(&l:omnifunc)."), setbufvar('%', '&completeopt', ".string(&l:completeopt).")][0]\<cr>",'t')
   let &l:omnifunc=a:fun
+  let &l:completeopt = co
   return "\<C-x>\<C-o>"
 endf

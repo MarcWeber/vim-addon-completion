@@ -124,8 +124,13 @@ fun! vim_addon_completion#InoremapCompletions(settings, list)
     if empty(lhs)
       throw "bad lhs setting for ".lhs_key
     endif
-    let completeopts = get(a:settings, opt_key, "preview,menu,menuone")
-      exec 'inoremap <buffer> <expr> '.lhs
-            \ .' vim_addon_completion#CompleteUsing('.string(i.fun).','.string(completeopts).')'
+
+    if mapcheck(lhs, 'i') || (!empty(&l:omnifunc) && lhs == "<c-x><c-o>") || (!empty(&l:completefunc) && lhs == "<c-x><c-u>")
+      echom "warning: completion collision for ".lhs_key.' on '. lhs .'. Consider overwriting lhs in your .vimrc. See vim-addon-completion and the plugin having default lhs '.lhs
+    else
+      let completeopts = get(a:settings, opt_key, "preview,menu,menuone")
+        exec 'inoremap <buffer> <expr> '.lhs
+              \ .' vim_addon_completion#CompleteUsing('.string(i.fun).','.string(completeopts).')'
+      endif
   endfor
 endf

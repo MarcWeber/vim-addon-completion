@@ -85,8 +85,8 @@ function! vim_addon_completion#BcAc()
 endfunction
 
 " complete with custom function preserving omnifunc setting
-" Usage: inoremap <buffer> <expr><silent> \start_completion vim_addon_completien#CompleteWith("vim_addon_completion#CompleteWordsInBuffer")'
-fun! vim_addon_completion#CompleteUsing(func_name, ...)
+" Usage: inoremap <buffer> <expr> \start_completion vim_addon_completien#CompleteWith("vim_addon_completion#CompleteWordsInBuffer")'
+fun! vim_addon_completion#CompleteUsing(fun, ...)
   let co = a:0 > 0 ? a:1 : &l:completeopt
   " after this characters have been process reset completion function.
   " feedkeys must be used, returning same chars with return will hide the
@@ -95,4 +95,37 @@ fun! vim_addon_completion#CompleteUsing(func_name, ...)
   let &l:omnifunc=a:fun
   let &l:completeopt = co
   return "\<C-x>\<C-o>"
+endf
+
+" Usage:
+" plugin file:
+" if !exists('g:vim_haxe') | let g:vim_haxe = {} | endif | let s:c = g:vim_haxe
+" let s:c.complete_lhs_haxe = get(s:c, 'complete_lhs_haxe', '<c-x><c-o>')
+" let s:c.complete_lhs_tags = get(s:c, 'complete_lhs_tags', '<c-x><c-u>')
+"
+" ftplugin or au command:
+" if !exists('g:vim_haxe') | let g:vim_haxe = {} | endif | let s:c = g:vim_haxe
+" vim_addon_completion#InoremapCompletions(s:c, [
+" \ { 'setting_keys' : ['complete_lhs_haxe'], 'fun': 'haxe#CompleteHAXE'},
+" \ { 'setting_keys' : ['complete_lhs_tags'], 'fun': 'haxe#CompleteClassNames'}
+" \ ] )
+" key_suffix is optional
+"
+" Description: user completion settings are taken from a:settings using
+" keys complete_lhs{suffix} and complete_opts{suffix}
+" defining completion functions using vim_addon_completion#CompleteUsing
+" which restores omnifunc setting.
+fun! vim_addon_completion#InoremapCompletions(settings, list)
+  for i in a:list
+    let key_suffix = get(i,'key_suffix','')
+    let lhs_key = i.setting_keys[0]
+    let opt_key = get(i.setting_keys, 1, substitute(lhs_key, '_lhs\>','_opts',''))
+    let lhs = a:settings[lhs_key]
+    if empty(lhs)
+      throw "bad lhs setting for ".lhs_key
+    endif
+    let completeopts = get(a:settings, opt_key, "preview,menu,menuone")
+      exec 'inoremap <buffer> <expr> '.lhs
+            \ .' vim_addon_completion#CompleteUsing('.string(i.fun).','.string(completeopts).')'
+  endfor
 endf

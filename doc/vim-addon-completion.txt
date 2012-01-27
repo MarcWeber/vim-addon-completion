@@ -1,60 +1,22 @@
 Purpose
 =======
-Let the user select a completion function.
-Example: Word completion with CamelCase matching (-> inoremap below)
+completion helpers:
 
-If you use a completion function I recommend creating your own mapping like this:
-  inoremap <buffer> <C-x><C-w> <c-r>=vim_addon_completion#CompleteUsing('vim_addon_completion#CompleteWordsInBuffer')<cr>
-This version also stores current omnifunc in the list so that you can get it back easily
+(1) vim_addon_completion#AdvancedCamelCaseMatching(expr):
+ implements camel case matching
 
-
-  " This is an alternative. But sometimes vim pastes (arbitrary?) characters into the buffer:
-  " inoremap <buffer> <C-x><c-w> <c-o>:setlocal omnifunc=vim_addon_completion#CompleteWordsInBuffer<cr><c-x><c-o>
-
-
-usage
-=====
-- register a func:
-
-  call vim_addon_completion#RegisterCompletionFunc({'func':'MyComplete'})
-
-  optional keys you can pass along with 'func':
-    scope: filetype name (optional)
-    description: long description (optional)
-    completeopt: completion options to be used for this completion function (optional)
+(2) vim_addon_completion#CompleteUsing(func_name):
+  allows completion using custom function preserving completion func setting
+  
+  Example usage: 
+    inoremap <buffer><exec> <c-x><c-w> vim_addon_completion#CompleteUsing('vim_addon_completion#CompleteWordsInBuffer')
 
 
-- choose a completion function:
-  commands:
-
-  CFComplete optional-regex
-  OFComplete optional-regex
-
-  where
-    C = completefunc
-    O = ompnifunc
-
-
-  Note: If you choose either omni or complete func and the other hasn't been
-  defined yet it will be set to the next available function automatically.
-  I nmost cases you don't have that many functions.
-
-INFO:
-
-  This plugin remaps <c-x><c-o> and <c-x><c-u>. If no function was defined
-  yet you'll be asked to choose your completion func.
-
-  use
-    call vim_addon_completion#SetCompletionFunc(func)
-
-  within a filetype file to prevent this
-
-
-
-  This script tries hard to not interfer with existing scripts. If a completion
-  function is found which is not in the function list it will be added
-  automatically.
-
+historical notes:
+===================
+All the old code keeping multiple completion functions as alternative was
+removed because it was too hard to remember which completion func was set in a buffer.
+The only sane way is ask users to define their own mappings as shown above at <c-x><c-w>.
 
 How to provide customizable matches to users
 ============================================

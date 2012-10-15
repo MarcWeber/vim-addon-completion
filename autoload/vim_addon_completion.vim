@@ -1,8 +1,15 @@
 " provide a function which translates a pattern into a regex and or glob
 " pattern. You can implement camel case matching this way.
-"
+
+" exec vam#DefineAndBind('s:c','g:addon_completion','{}')
+if !exists('g:addon_completion') | let g:addon_completion = {} | endif | let s:c = g:addon_completion
+
+" restoring breaks <backspace> beyond starting col.
+let s:c.restore_omni_func = get(s:c,'restore_omni_func', 0)
+
+
 " may return {}
-" if vim_regex is returned this pattern should be matched against names as
+"vim_dev_plugin#VimOmniComplete if vim_regex is returned this pattern should be matched against names as
 " well to determine wether an item must be added to the completion list
 " users can implement camel case matching or similar
 " identifier: a name of the completion invoking this function.
@@ -91,7 +98,17 @@ fun! vim_addon_completion#CompleteUsing(fun, ...)
   " after this characters have been process reset completion function.
   " feedkeys must be used, returning same chars with return will hide the
   " completion menue.
-  call feedkeys("\<C-r>=['', setbufvar('%', '&omnifunc', ".string(&l:omnifunc)."), setbufvar('%', '&completeopt', ".string(&l:completeopt).")][0]\<cr>",'t')
+  " can't reset completeopts. They are still used by Vim
+  if s:c.restore_omni_func
+    " this breaks <backspace> beoynd starting col.
+    " restoring old setting could be delayed till next omnifunc invokation -
+    " but then other code would break.
+    call feedkeys("\<C-r>=['', setbufvar('%', '&omnifunc', ".string(&l:omnifunc).")][0]\<cr>",'t')
+  endif
+  if !exists('b:omnifuncs') | let b:omnifuncs = {} | endif
+  if &l:omnifunc
+    let b:omnifuncs[&l:omnifunc] = &l:omnifunc
+  endif
   let &l:omnifunc=a:fun
   let &l:completeopt = co
   return "\<C-x>\<C-o>"
@@ -105,7 +122,7 @@ endf
 "
 " ftplugin or au command:
 " if !exists('g:vim_haxe') | let g:vim_haxe = {} | endif | let s:c = g:vim_haxe
-" vim_addon_completion#InoremapCompletions(s:c, [
+" call vim_addon_completion#InoremapCompletions(s:c, [
 " \ { 'setting_keys' : ['complete_lhs_haxe'], 'fun': 'haxe#CompleteHAXE'},
 " \ { 'setting_keys' : ['complete_lhs_tags'], 'fun': 'haxe#CompleteClassNames'}
 " \ ] )
@@ -125,12 +142,19 @@ fun! vim_addon_completion#InoremapCompletions(settings, list)
       throw "bad lhs setting for ".lhs_key
     endif
 
+    if !exists('b:vim_addon_completions')
+      let b:vim_addon_completions = []
+      command! -buffer CompletionsDefinedByVimAddonCompletion for x in b:vim_addon_completions | echo x | endfor
+    endif
+
     if mapcheck(lhs, 'i') || (!empty(&l:omnifunc) && lhs == "<c-x><c-o>") || (!empty(&l:completefunc) && lhs == "<c-x><c-u>")
       echom "warning: completion collision for ".lhs_key.' on '. lhs .'. Consider overwriting lhs in your .vimrc. See vim-addon-completion and the plugin having default lhs '.lhs
+      call add(b:vim_addon_completions, lhs . ' ' . i.fun . ' omitted due to collision')
     else
       let completeopts = get(a:settings, opt_key, "preview,menu,menuone")
         exec 'inoremap <buffer> <expr> '.lhs
               \ .' vim_addon_completion#CompleteUsing('.string(i.fun).','.string(completeopts).')'
-      endif
+      call add(b:vim_addon_completions, lhs.' ' . i.fun)
+    endif
   endfor
 endf

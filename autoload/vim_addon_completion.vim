@@ -58,7 +58,7 @@ endfunction
 fun! vim_addon_completion#CompleteWordsInBuffer(findstart, base)
   if a:findstart
     let [bc,ac] = vim_addon_completion#BcAc()
-    let s:match_text = matchstr(bc, '\zs[^\t#$,().&[\]/{}\''`";: ]*$')
+    let s:match_text = matchstr(bc, '\zs[^\t#$,().&[\]/<>{}\''`";: ]*$')
     let s:start = len(bc)-len(s:match_text)
     return s:start
   else
@@ -148,7 +148,12 @@ fun! vim_addon_completion#InoremapCompletions(settings, list)
     endif
 
     if mapcheck(lhs, 'i') || (!empty(&l:omnifunc) && lhs == "<c-x><c-o>") || (!empty(&l:completefunc) && lhs == "<c-x><c-u>")
-      echom "warning: completion collision for ".lhs_key.' on '. lhs .'. Consider overwriting lhs in your .vimrc. See vim-addon-completion and the plugin having default lhs '.lhs
+      redir => is_
+      exec 'verbose inoremap '.lhs
+      redir END
+
+      echom "warning: completion collision for ".lhs.', completion function: '. i.fun .'. Mapping found: '.is_.'. Consider overwriting lhs in your .vimrc. See vim-addon-completion and the plugin having default lhs '.lhs
+      call add(b:vim_addon_completions, lhs . ' ' . &omnifunc . ' causing collision')
       call add(b:vim_addon_completions, lhs . ' ' . i.fun . ' omitted due to collision')
     else
       let completeopts = get(a:settings, opt_key, "preview,menu,menuone")

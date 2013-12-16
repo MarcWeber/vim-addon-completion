@@ -9,7 +9,7 @@ completion helpers:
   allows completion using custom function preserving completion func setting
   
   Example usage: 
-    inoremap <buffer><exec> <c-x><c-w> vim_addon_completion#CompleteUsing('vim_addon_completion#CompleteWordsInBuffer')
+    inoremap <buffer> <expr> <c-x><c-w> vim_addon_completion#CompleteUsing('vim_addon_completion#CompleteWordsInBuffer')
 
 
 historical notes:

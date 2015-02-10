@@ -64,7 +64,7 @@ fun! vim_addon_completion#CompleteWordsInBuffer(findstart, base)
   else
     
     let words = {}
-    for w in split(join(getline(1, line('$'))," "),'[/#$,''"`; \&()[\t\]{}.,+*:]\+')
+    for w in split(join(getline(1, line('$'))," "),'[/#$|,''"`; \&()[\t\]{}.,+*:]\+')
       let words[w] = 1
     endfor
 
